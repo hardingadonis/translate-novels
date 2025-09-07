@@ -26,7 +26,7 @@ const ChapterSplitting = ({
 	fileContent,
 	onChaptersSplit,
 }: ChapterSplittingProps) => {
-	const [keywords, setKeywords] = useState('Chapter,CHAPTER,Chương,CHƯƠNG');
+	const [keywords, setKeywords] = useState('Chapter,CHAPTER,chapter,CHƯƠNG');
 	const [chapters, setChapters] = useState<Chapter[]>([]);
 	const [isProcessing, setIsProcessing] = useState(false);
 
@@ -35,7 +35,7 @@ const ChapterSplitting = ({
 		chapterKeywords: string[],
 	): Chapter[] => {
 		const keywordPattern = chapterKeywords.map((k) => k.trim()).join('|');
-		const regex = new RegExp(`^\\s*(${keywordPattern})\\s*\\d+`, 'gmi');
+		const regex = new RegExp(`(${keywordPattern})\\s*\\d+`, 'gmi');
 
 		const matches: { index: number; match: string }[] = [];
 		let match;
