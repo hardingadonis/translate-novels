@@ -1,5 +1,5 @@
 import { FileTextOutlined, InboxOutlined } from '@ant-design/icons';
-import { Alert, Button, Card, Spin, Typography, Upload } from 'antd';
+import { Alert, Button, Card, Spin, Typography, Upload, message } from 'antd';
 import type { UploadProps } from 'antd';
 import { useState } from 'react';
 
@@ -16,19 +16,8 @@ const FileUpload = ({ onFileUploaded }: FileUploadProps) => {
 		name: string;
 		size: number;
 		preview: string;
+		fullContent: string; // Store the full content
 	} | null>(null);
-
-	const readFileContent = (file: File): Promise<string> => {
-		return new Promise((resolve, reject) => {
-			const reader = new FileReader();
-			reader.onload = (e) => {
-				const content = e.target?.result as string;
-				resolve(content);
-			};
-			reader.onerror = () => reject(new Error('Failed to read file'));
-			reader.readAsText(file, 'utf-8');
-		});
-	};
 
 	const formatFileSize = (bytes: number): string => {
 		if (bytes === 0) return '0 Bytes';
@@ -41,49 +30,73 @@ const FileUpload = ({ onFileUploaded }: FileUploadProps) => {
 	const handleFileChange: UploadProps['onChange'] = async (info) => {
 		const { file } = info;
 
-		if (file.status === 'uploading') {
-			setLoading(true);
+		// Use the file directly since beforeUpload: () => false
+		const rawFile = file as unknown as File;
+
+		if (!rawFile.name.toLowerCase().endsWith('.txt')) {
+			message.error('Please select a .txt file only');
 			return;
 		}
 
-		if (file.originFileObj) {
-			try {
-				setLoading(true);
-				const content = await readFileContent(file.originFileObj);
+		// Validate file size (10MB limit)
+		const maxSize = 10 * 1024 * 1024; // 10MB in bytes
+		if (rawFile.size > maxSize) {
+			message.error('File size must be less than 10MB');
+			return;
+		}
 
-				const preview =
-					content.length > 500 ? content.substring(0, 500) + '...' : content;
+		setLoading(true);
+		message.loading('Reading file content...', 0);
 
-				setFileInfo({
-					name: file.name,
-					size: file.size || 0,
-					preview: preview,
-				});
+		try {
+			// Use modern File.text() API directly
+			const content = await rawFile.text();
 
+			// Validate content is not empty
+			if (!content.trim()) {
+				message.destroy();
+				message.error('The selected file is empty');
 				setLoading(false);
-			} catch (error) {
-				console.error('Error reading file:', error);
-				setLoading(false);
+				return;
 			}
+
+			const preview =
+				content.length > 500 ? content.substring(0, 500) + '...' : content;
+
+			setFileInfo({
+				name: rawFile.name,
+				size: rawFile.size,
+				preview: preview,
+				fullContent: content, // Store the full content
+			});
+
+			message.destroy();
+			message.success(`File "${rawFile.name}" loaded successfully!`);
+		} catch (error) {
+			console.error('Error reading file:', error);
+			message.destroy();
+			message.error('Failed to read file');
+		} finally {
+			setLoading(false);
 		}
 	};
+	const handleClearFile = () => {
+		setFileInfo(null);
+		setLoading(false);
+		message.success('File cleared. You can upload a new file.');
+	};
 
-	const handleConfirmUpload = async () => {
-		if (fileInfo && fileInfo.name) {
-			// Re-read the full file content for processing
-			const fileInput = document.querySelector(
-				'input[type="file"]',
-			) as HTMLInputElement;
-			if (fileInput?.files?.[0]) {
-				setLoading(true);
-				try {
-					const fullContent = await readFileContent(fileInput.files[0]);
-					onFileUploaded(fullContent, fileInfo.name);
-				} catch (error) {
-					console.error('Error reading full file:', error);
-				}
-				setLoading(false);
-			}
+	const handleConfirmUpload = () => {
+		if (!fileInfo || !fileInfo.name || !fileInfo.fullContent) {
+			message.error('No file selected');
+			return;
+		}
+
+		// Use the stored content directly
+		if (fileInfo.fullContent.trim()) {
+			onFileUploaded(fileInfo.fullContent, fileInfo.name);
+		} else {
+			message.error('The selected file is empty');
 		}
 	};
 
@@ -91,9 +104,10 @@ const FileUpload = ({ onFileUploaded }: FileUploadProps) => {
 		name: 'file',
 		multiple: false,
 		accept: '.txt',
-		beforeUpload: () => false, // Prevent automatic upload
+		beforeUpload: () => false, // Prevent automatic upload, handle in onChange
 		onChange: handleFileChange,
 		showUploadList: false,
+		maxCount: 1,
 	};
 
 	return (
@@ -126,9 +140,12 @@ const FileUpload = ({ onFileUploaded }: FileUploadProps) => {
 					size="small"
 					style={{ marginBottom: 24 }}
 					extra={
-						<Button type="primary" onClick={handleConfirmUpload}>
-							Confirm & Continue
-						</Button>
+						<div style={{ display: 'flex', gap: '8px' }}>
+							<Button onClick={handleClearFile}>Clear File</Button>
+							<Button type="primary" onClick={handleConfirmUpload}>
+								Confirm & Continue
+							</Button>
+						</div>
 					}
 				>
 					<div style={{ marginBottom: 16 }}>
@@ -137,9 +154,9 @@ const FileUpload = ({ onFileUploaded }: FileUploadProps) => {
 						<Text strong>Size:</Text> {formatFileSize(fileInfo.size)}
 						<br />
 						<Text strong>Characters:</Text>{' '}
-						{fileInfo.preview.length > 500
-							? '500+ (preview)'
-							: fileInfo.preview.length}
+						{fileInfo.fullContent.length.toLocaleString()} characters
+						{fileInfo.preview.length < fileInfo.fullContent.length &&
+							' (preview shown below)'}
 					</div>
 
 					<div>
