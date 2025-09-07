@@ -5,6 +5,7 @@ import type { Metadata } from 'next';
 export const metadata: Metadata = {
 	title: 'Translate Novels',
 	description: '📚 A simple website for translating novels via LM',
+	authors: { name: 'Minh Vương', url: 'https://github.com/hardingadonis' },
 };
 
 const RootLayout = ({
