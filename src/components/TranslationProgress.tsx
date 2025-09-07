@@ -98,7 +98,7 @@ const TranslationProgress = ({
 					headers: {
 						'Content-Type': 'application/json',
 					},
-					timeout: 300000, // 5 minute timeout for long translations
+					timeout: 600000, // 10 minute timeout for long translations
 				},
 			);
 
