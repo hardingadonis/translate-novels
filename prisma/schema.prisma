@@ -1,0 +1,40 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:translate-novels-database.db"
+}
+
+// --------------------------------------------------------------------------------
+
+model APILMStudio {
+  id          String @id @default(uuid())
+  apiEndpoint String @unique @map("api_endpoint")
+
+  @@map("api_lm_studio")
+}
+
+model Novel {
+  id    String @id @default(uuid())
+  title String @map("title")
+
+  chapters Chapter[]
+
+  @@map("novels")
+}
+
+model Chapter {
+  id      String @id @default(uuid())
+  novelId String @map("novel_id")
+
+  rawContent        String @map("raw_content")
+  vietnameseContent String @map("vietnamese_content")
+  order             Int    @default(0) @map("order")
+
+  novel Novel @relation(fields: [novelId], references: [id], onDelete: Cascade)
+
+  @@map("chapters")
+}
