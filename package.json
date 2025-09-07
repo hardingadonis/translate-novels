@@ -3,12 +3,15 @@
 	"version": "1.0.0",
 	"private": true,
 	"scripts": {
-		"dev": "next dev --turbopack",
-		"build": "next build --turbopack",
+		"dev": "next dev",
+		"build": "next build",
 		"start": "next start",
 		"lint": "eslint"
 	},
 	"dependencies": {
+		"@ant-design/nextjs-registry": "1.1.0",
+		"@ant-design/v5-patch-for-react-19": "1.0.3",
+		"antd": "5.27.3",
 		"next": "15.5.2",
 		"react": "19.1.1",
 		"react-dom": "19.1.1"
