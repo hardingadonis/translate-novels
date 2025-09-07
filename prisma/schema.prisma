@@ -30,9 +30,9 @@ model Chapter {
   id      String @id @default(uuid())
   novelId String @map("novel_id")
 
-  rawContent        String @map("raw_content")
-  vietnameseContent String @map("vietnamese_content")
-  order             Int    @default(0) @map("order")
+  rawContent        String  @map("raw_content")
+  vietnameseContent String? @map("vietnamese_content")
+  order             Int     @default(0) @map("order")
 
   novel Novel @relation(fields: [novelId], references: [id], onDelete: Cascade)
 
