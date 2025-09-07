@@ -1,6 +1,6 @@
 import { ApiOutlined, DeleteOutlined, SaveOutlined } from '@ant-design/icons';
 import { Alert, Button, Card, Form, Input, Space, message } from 'antd';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 interface APIConfigurationProps {
 	currentEndpoint: string;
@@ -13,6 +13,20 @@ const APIConfiguration = ({
 }: APIConfigurationProps) => {
 	const [form] = Form.useForm();
 	const [endpoint, setEndpoint] = useState(currentEndpoint);
+	const [isInputDisabled, setIsInputDisabled] = useState(!!currentEndpoint);
+
+	// Update form and input state when currentEndpoint changes
+	useEffect(() => {
+		if (currentEndpoint) {
+			form.setFieldsValue({ endpoint: currentEndpoint });
+			setEndpoint(currentEndpoint);
+			setIsInputDisabled(true);
+		} else {
+			form.resetFields();
+			setEndpoint('');
+			setIsInputDisabled(false);
+		}
+	}, [currentEndpoint, form]);
 
 	const handleSave = () => {
 		const values = form.getFieldsValue();
@@ -27,6 +41,7 @@ const APIConfiguration = ({
 			new URL(apiUrl);
 			localStorage.setItem('lm-studio-endpoint', apiUrl);
 			setEndpoint(apiUrl);
+			setIsInputDisabled(true); // Disable input after saving
 			message.success('API endpoint saved successfully');
 			onConfigured(apiUrl);
 		} catch {
@@ -37,13 +52,16 @@ const APIConfiguration = ({
 	const handleDelete = () => {
 		localStorage.removeItem('lm-studio-endpoint');
 		setEndpoint('');
+		setIsInputDisabled(false); // Re-enable input after deleting
 		form.resetFields();
 		message.success('API endpoint deleted');
 	};
 
 	const testEndpoint = async () => {
-		const values = form.getFieldsValue();
-		const apiUrl = values.endpoint?.trim();
+		// Use saved endpoint when input is disabled, otherwise use form value
+		const apiUrl = isInputDisabled
+			? endpoint
+			: form.getFieldsValue().endpoint?.trim();
 
 		if (!apiUrl) {
 			message.error('Please enter an API endpoint to test');
@@ -76,8 +94,12 @@ const APIConfiguration = ({
 		<Card title="API Configuration" extra={<ApiOutlined />}>
 			<Alert
 				message="Configure your LM Studio API endpoint"
-				description="Enter the URL for your LM Studio server. Default is usually http://localhost:1234"
-				type="info"
+				description={
+					endpoint
+						? "API endpoint is configured and saved. Click 'Delete Saved' to change the endpoint."
+						: 'Enter the URL for your LM Studio server. Default is usually http://localhost:1234'
+				}
+				type={endpoint ? 'success' : 'info'}
 				style={{ marginBottom: 24 }}
 			/>
 
@@ -97,6 +119,7 @@ const APIConfiguration = ({
 					<Input
 						placeholder="http://localhost:1234"
 						size="large"
+						disabled={isInputDisabled}
 						onChange={(e) => form.setFieldValue('endpoint', e.target.value)}
 					/>
 				</Form.Item>
@@ -107,6 +130,7 @@ const APIConfiguration = ({
 						icon={<SaveOutlined />}
 						onClick={handleSave}
 						size="large"
+						disabled={isInputDisabled} // Disable save button when input is disabled
 					>
 						Save Endpoint
 					</Button>
@@ -118,7 +142,11 @@ const APIConfiguration = ({
 					>
 						Delete Saved
 					</Button>
-					<Button onClick={testEndpoint} size="large">
+					<Button
+						onClick={testEndpoint}
+						size="large"
+						disabled={!endpoint} // Only allow testing when endpoint exists
+					>
 						Test Connection
 					</Button>
 				</Space>
