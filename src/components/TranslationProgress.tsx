@@ -5,7 +5,6 @@ import {
 	PauseCircleOutlined,
 	PlayCircleOutlined,
 } from '@ant-design/icons';
-import { LMStudioClient } from '@lmstudio/sdk';
 import {
 	Alert,
 	Button,
@@ -17,6 +16,7 @@ import {
 	Typography,
 	message,
 } from 'antd';
+import axios from 'axios';
 import { useRef, useState } from 'react';
 
 import type { Chapter } from '@/App';
@@ -78,25 +78,56 @@ const TranslationProgress = ({
 		index: number,
 	): Promise<string> => {
 		try {
-			const client = new LMStudioClient({ baseUrl: apiEndpoint });
-
-			const model = await client.llm.load('local');
-
 			const fullPrompt = `${translationPrompt}\n\nChapter content to translate:\n\n${chapter.content}`;
 
-			const prediction = model.respond([{ role: 'user', content: fullPrompt }]);
+			// Make a POST request to the LM Studio chat completions endpoint
+			const response = await axios.post(
+				`${apiEndpoint}/v1/chat/completions`,
+				{
+					model: 'local', // LM Studio uses 'local' as the model identifier
+					messages: [
+						{
+							role: 'user',
+							content: fullPrompt,
+						},
+					],
+					temperature: 0.7,
+					stream: false, // We'll use non-streaming for simplicity
+				},
+				{
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					timeout: 300000, // 5 minute timeout for long translations
+				},
+			);
 
-			let translatedText = '';
-			for await (const text of prediction) {
-				if (shouldStop.current) {
-					throw new Error('Translation stopped by user');
-				}
-				translatedText += text;
+			if (response.data && response.data.choices && response.data.choices[0]) {
+				const translatedText = response.data.choices[0].message.content;
+				return translatedText.trim();
+			} else {
+				throw new Error('Invalid response format from LM Studio API');
 			}
-
-			return translatedText.trim();
 		} catch (error) {
 			console.error(`Error translating chapter ${index + 1}:`, error);
+
+			// Provide more specific error messages
+			if (axios.isAxiosError(error)) {
+				if (error.code === 'ECONNREFUSED') {
+					throw new Error(
+						'Cannot connect to LM Studio. Please ensure LM Studio is running and the API server is started.',
+					);
+				} else if (error.response?.status === 404) {
+					throw new Error(
+						'LM Studio API endpoint not found. Please check if a model is loaded in LM Studio.',
+					);
+				} else if (error.response && error.response.status >= 500) {
+					throw new Error(
+						'LM Studio server error. Please check the model and try again.',
+					);
+				}
+			}
+
 			throw error;
 		}
 	};
