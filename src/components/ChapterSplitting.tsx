@@ -1,4 +1,3 @@
-import type { Chapter } from '../App';
 import { ReloadOutlined, SplitCellsOutlined } from '@ant-design/icons';
 import {
 	Alert,
@@ -12,6 +11,8 @@ import {
 	Typography,
 } from 'antd';
 import { useEffect, useState } from 'react';
+
+import type { Chapter } from '@/App';
 
 const { TextArea } = Input;
 const { Text, Title } = Typography;

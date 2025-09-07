@@ -1,4 +1,3 @@
-import type { Chapter } from '../App';
 import {
 	ArrowLeftOutlined,
 	CheckCircleOutlined,
@@ -19,6 +18,8 @@ import {
 	message,
 } from 'antd';
 import { useRef, useState } from 'react';
+
+import type { Chapter } from '@/App';
 
 const { Text, Title } = Typography;
 

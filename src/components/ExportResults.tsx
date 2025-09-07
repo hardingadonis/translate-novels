@@ -1,10 +1,11 @@
-import type { Chapter } from '../App';
 import {
 	CheckCircleOutlined,
 	DownloadOutlined,
 	ReloadOutlined,
 } from '@ant-design/icons';
 import { Alert, Button, Card, Divider, Space, Tag, Typography } from 'antd';
+
+import type { Chapter } from '@/App';
 
 const { Title, Text } = Typography;
 

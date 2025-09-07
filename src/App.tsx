@@ -1,12 +1,12 @@
 import { Card, Layout, Steps, message } from 'antd';
 import { useEffect, useState } from 'react';
 
-import APIConfiguration from './components/APIConfiguration';
-import ChapterSplitting from './components/ChapterSplitting';
-import ExportResults from './components/ExportResults';
-import FileUpload from './components/FileUpload';
-import TranslationProgress from './components/TranslationProgress';
-import TranslationPrompt from './components/TranslationPrompt';
+import APIConfiguration from '@/components/APIConfiguration';
+import ChapterSplitting from '@/components/ChapterSplitting';
+import ExportResults from '@/components/ExportResults';
+import FileUpload from '@/components/FileUpload';
+import TranslationProgress from '@/components/TranslationProgress';
+import TranslationPrompt from '@/components/TranslationPrompt';
 
 const { Header, Content } = Layout;
 
