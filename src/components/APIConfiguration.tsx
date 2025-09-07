@@ -49,6 +49,12 @@ const APIConfiguration = ({
 		}
 	};
 
+	const handleContinue = () => {
+		if (endpoint) {
+			onConfigured(endpoint);
+		}
+	};
+
 	const handleDelete = () => {
 		localStorage.removeItem('lm-studio-endpoint');
 		setEndpoint('');
@@ -96,7 +102,7 @@ const APIConfiguration = ({
 				message="Configure your LM Studio API endpoint"
 				description={
 					endpoint
-						? "API endpoint is configured and saved. Click 'Delete Saved' to change the endpoint."
+						? "API endpoint is configured and saved. Click 'Continue to Next Step' to proceed, or 'Change Endpoint' to modify the configuration."
 						: 'Enter the URL for your LM Studio server. Default is usually http://localhost:1234'
 				}
 				type={endpoint ? 'success' : 'info'}
@@ -125,22 +131,28 @@ const APIConfiguration = ({
 				</Form.Item>
 
 				<Space>
-					<Button
-						type="primary"
-						icon={<SaveOutlined />}
-						onClick={handleSave}
-						size="large"
-						disabled={isInputDisabled} // Disable save button when input is disabled
-					>
-						Save Endpoint
-					</Button>
+					{!isInputDisabled && (
+						<Button
+							type="primary"
+							icon={<SaveOutlined />}
+							onClick={handleSave}
+							size="large"
+						>
+							Save Endpoint
+						</Button>
+					)}
+					{isInputDisabled && (
+						<Button type="primary" onClick={handleContinue} size="large">
+							Continue to Next Step
+						</Button>
+					)}
 					<Button
 						icon={<DeleteOutlined />}
 						onClick={handleDelete}
 						disabled={!endpoint}
 						size="large"
 					>
-						Delete Saved
+						{isInputDisabled ? 'Change Endpoint' : 'Delete Saved'}
 					</Button>
 					<Button
 						onClick={testEndpoint}
