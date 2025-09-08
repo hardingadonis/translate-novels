@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
 		}
 
 		return NextResponse.json({ results });
-	} catch (_error) {
+	} catch {
 		return NextResponse.json(
 			{ error: 'Failed to translate chapters' },
 			{ status: 500 },

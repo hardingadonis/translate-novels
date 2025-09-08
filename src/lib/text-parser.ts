@@ -14,7 +14,8 @@ export const parseChaptersFromText = (text: string): ParsedChapter[] => {
 	];
 
 	const currentText = text.trim();
-	const allMatches: Array<{ match: string; index: number; pattern: RegExp }> = [];
+	const allMatches: Array<{ match: string; index: number; pattern: RegExp }> =
+		[];
 
 	for (const pattern of chapterPatterns) {
 		const matches = Array.from(currentText.matchAll(pattern));
@@ -80,7 +81,9 @@ export const parseChaptersFromText = (text: string): ParsedChapter[] => {
 			chapterEnd = currentText.length;
 		}
 
-		const chapterContent = currentText.substring(chapterStart, chapterEnd).trim();
+		const chapterContent = currentText
+			.substring(chapterStart, chapterEnd)
+			.trim();
 
 		if (chapterContent) {
 			chapters.push({

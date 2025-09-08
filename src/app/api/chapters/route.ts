@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
 
 		const chapters = await getAllChaptersByNovel(parseInt(novelId));
 		return NextResponse.json(chapters);
-	} catch (_error) {
+	} catch {
 		return NextResponse.json(
 			{ error: 'Failed to fetch chapters' },
 			{ status: 500 },
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
 			const chapter = await createChapter({ rawContent, novelId, order });
 			return NextResponse.json(chapter, { status: 201 });
 		}
-	} catch (_error) {
+	} catch {
 		return NextResponse.json(
 			{ error: 'Failed to create chapter(s)' },
 			{ status: 500 },
@@ -72,7 +72,7 @@ export async function PUT(request: NextRequest) {
 			order,
 		});
 		return NextResponse.json(chapter);
-	} catch (_error) {
+	} catch {
 		return NextResponse.json(
 			{ error: 'Failed to update chapter' },
 			{ status: 500 },
@@ -90,7 +90,7 @@ export async function DELETE(request: NextRequest) {
 
 		await deleteChapter(id);
 		return NextResponse.json({ success: true });
-	} catch (_error) {
+	} catch {
 		return NextResponse.json(
 			{ error: 'Failed to delete chapter' },
 			{ status: 500 },

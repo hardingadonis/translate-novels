@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
 
 		const result = await testLMStudioConnection(apiEndpoint);
 		return NextResponse.json(result);
-	} catch (_error) {
+	} catch {
 		return NextResponse.json(
 			{ error: 'Failed to test connection' },
 			{ status: 500 },

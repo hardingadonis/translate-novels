@@ -21,7 +21,7 @@ export async function GET(
 		}
 
 		return NextResponse.json(novel);
-	} catch (_error) {
+	} catch {
 		return NextResponse.json(
 			{ error: 'Failed to fetch novel' },
 			{ status: 500 },
