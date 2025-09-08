@@ -53,7 +53,6 @@ export const translateWithLMStudio = async (
 					{ role: 'user', content: content },
 				],
 				temperature: 0.7,
-				max_tokens: 4000,
 			}),
 		});
 
