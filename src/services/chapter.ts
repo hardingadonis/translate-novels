@@ -7,11 +7,30 @@ export const getAllChaptersByNovel = async (
 	try {
 		return await prisma.chapter.findMany({
 			where: { novelId },
+			orderBy: { order: 'asc' },
 		});
 	} catch (error) {
 		console.error('Error fetching chapters:', error);
 
 		throw new Error('Failed to fetch chapters');
+	}
+};
+
+export const createMultipleChapters = async (
+	chapters: {
+		rawContent: string;
+		novelId: number;
+		order: number;
+	}[],
+): Promise<Chapter[]> => {
+	try {
+		const createdChapters = await prisma.$transaction(
+			chapters.map((chapter) => prisma.chapter.create({ data: chapter })),
+		);
+		return createdChapters;
+	} catch (error) {
+		console.error('Error creating chapters:', error);
+		throw new Error('Failed to create chapters');
 	}
 };
 
@@ -28,9 +47,9 @@ export const getChapter = async (id: number): Promise<Chapter | null> => {
 };
 
 export const createChapter = async (data: {
-	title: string;
 	rawContent: string;
 	novelId: number;
+	order?: number;
 }): Promise<Chapter> => {
 	try {
 		return await prisma.chapter.create({
@@ -46,7 +65,6 @@ export const createChapter = async (data: {
 export const updateChapter = async (
 	id: number,
 	data: {
-		title?: string;
 		rawContent?: string;
 		vietnameseContent?: string;
 		order?: number;

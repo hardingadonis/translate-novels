@@ -11,8 +11,76 @@ export const getAllLMStudios = async (): Promise<APILMStudio[]> => {
 	}
 };
 
+export const testLMStudioConnection = async (
+	apiEndpoint: string,
+): Promise<{ success: boolean; models?: any[]; error?: string }> => {
+	try {
+		const response = await fetch(`${apiEndpoint}/v1/models`);
+		if (!response.ok) {
+			return {
+				success: false,
+				error: `HTTP ${response.status}: ${response.statusText}`,
+			};
+		}
+		const data = await response.json();
+		return { success: true, models: data.data || [] };
+	} catch (error) {
+		return {
+			success: false,
+			error: error instanceof Error ? error.message : 'Connection failed',
+		};
+	}
+};
+
+export const translateWithLMStudio = async (
+	apiEndpoint: string,
+	content: string,
+	customPrompt?: string,
+): Promise<{ success: boolean; translation?: string; error?: string }> => {
+	try {
+		const prompt =
+			customPrompt ||
+			'Please translate the following text from English to Vietnamese, maintaining the narrative style and character names:';
+
+		const response = await fetch(`${apiEndpoint}/v1/chat/completions`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({
+				messages: [
+					{ role: 'system', content: prompt },
+					{ role: 'user', content: content },
+				],
+				temperature: 0.7,
+				max_tokens: 4000,
+			}),
+		});
+
+		if (!response.ok) {
+			return {
+				success: false,
+				error: `HTTP ${response.status}: ${response.statusText}`,
+			};
+		}
+
+		const data = await response.json();
+		const translation = data.choices?.[0]?.message?.content;
+
+		if (!translation) {
+			return { success: false, error: 'No translation received from API' };
+		}
+
+		return { success: true, translation };
+	} catch (error) {
+		return {
+			success: false,
+			error: error instanceof Error ? error.message : 'Translation failed',
+		};
+	}
+};
+
 export const createLMStudio = async (data: {
-	name: string;
 	apiEndpoint: string;
 }): Promise<APILMStudio> => {
 	try {
@@ -29,7 +97,6 @@ export const createLMStudio = async (data: {
 export const updateLMStudio = async (
 	id: number,
 	data: {
-		name?: string;
 		apiEndpoint?: string;
 	},
 ): Promise<APILMStudio> => {
