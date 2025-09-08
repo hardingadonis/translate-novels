@@ -21,8 +21,10 @@ import {
 	Upload,
 	message,
 } from 'antd';
-import type { UploadFile } from 'antd/lib/upload';
+import { AxiosError } from 'axios';
 import React, { useEffect, useState } from 'react';
+
+import axiosInstance from '@/lib/axios';
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -68,15 +70,16 @@ const NovelsComponent: React.FC = () => {
 	const fetchNovels = async () => {
 		setLoading(true);
 		try {
-			const response = await fetch('/api/novels');
-			if (response.ok) {
-				const data = await response.json();
-				setNovels(data);
-			} else {
-				message.error('Failed to fetch novels');
-			}
+			const response = await axiosInstance.get('/api/novels');
+			setNovels(response.data);
 		} catch (error) {
-			message.error('Error fetching novels');
+			if (error instanceof AxiosError) {
+				message.error(
+					`Failed to fetch novels: ${error.response?.statusText || error.message}`,
+				);
+			} else {
+				message.error('Error fetching novels');
+			}
 		} finally {
 			setLoading(false);
 		}
@@ -84,54 +87,44 @@ const NovelsComponent: React.FC = () => {
 
 	const handleCreateOrUpdate = async (values: { title: string }) => {
 		try {
-			const url = '/api/novels';
-			const method = editingNovel ? 'PUT' : 'POST';
-			const body = editingNovel
+			const method = editingNovel ? 'put' : 'post';
+			const data = editingNovel
 				? { id: editingNovel.id, title: values.title }
 				: { title: values.title };
 
-			const response = await fetch(url, {
-				method,
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify(body),
-			});
+			await axiosInstance[method]('/api/novels', data);
 
-			if (response.ok) {
-				message.success(
-					`Novel ${editingNovel ? 'updated' : 'created'} successfully`,
-				);
-				setModalVisible(false);
-				setEditingNovel(null);
-				form.resetFields();
-				fetchNovels();
-			} else {
-				message.error(`Failed to ${editingNovel ? 'update' : 'create'} novel`);
-			}
+			message.success(
+				`Novel ${editingNovel ? 'updated' : 'created'} successfully`,
+			);
+			setModalVisible(false);
+			setEditingNovel(null);
+			form.resetFields();
+			fetchNovels();
 		} catch (error) {
-			message.error(`Error ${editingNovel ? 'updating' : 'creating'} novel`);
+			if (error instanceof AxiosError) {
+				message.error(
+					`Failed to ${editingNovel ? 'update' : 'create'} novel: ${error.response?.statusText || error.message}`,
+				);
+			} else {
+				message.error(`Error ${editingNovel ? 'updating' : 'creating'} novel`);
+			}
 		}
 	};
 
 	const handleDelete = async (id: number) => {
 		try {
-			const response = await fetch('/api/novels', {
-				method: 'DELETE',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({ id }),
-			});
-
-			if (response.ok) {
-				message.success('Novel deleted successfully');
-				fetchNovels();
-			} else {
-				message.error('Failed to delete novel');
-			}
+			await axiosInstance.delete('/api/novels', { data: { id } });
+			message.success('Novel deleted successfully');
+			fetchNovels();
 		} catch (error) {
-			message.error('Error deleting novel');
+			if (error instanceof AxiosError) {
+				message.error(
+					`Failed to delete novel: ${error.response?.statusText || error.message}`,
+				);
+			} else {
+				message.error('Error deleting novel');
+			}
 		}
 	};
 
@@ -172,23 +165,19 @@ const NovelsComponent: React.FC = () => {
 
 	const parseChapters = async (content: string) => {
 		try {
-			const response = await fetch('/api/parse-chapters', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({ text: content }),
+			const response = await axiosInstance.post('/api/parse-chapters', {
+				text: content,
 			});
-
-			if (response.ok) {
-				const data = await response.json();
-				setParsedChapters(data.chapters);
-				setPreviewModalVisible(true);
-			} else {
-				message.error('Failed to parse chapters');
-			}
+			setParsedChapters(response.data.chapters);
+			setPreviewModalVisible(true);
 		} catch (error) {
-			message.error('Error parsing chapters');
+			if (error instanceof AxiosError) {
+				message.error(
+					`Failed to parse chapters: ${error.response?.statusText || error.message}`,
+				);
+			} else {
+				message.error('Error parsing chapters');
+			}
 		}
 	};
 
@@ -205,27 +194,23 @@ const NovelsComponent: React.FC = () => {
 				order: index,
 			}));
 
-			const response = await fetch('/api/chapters', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify(chaptersData),
-			});
+			await axiosInstance.post('/api/chapters', chaptersData);
 
-			if (response.ok) {
-				message.success('Chapters saved successfully');
-				setUploadModalVisible(false);
-				setPreviewModalVisible(false);
-				setParsedChapters([]);
-				setFileContent('');
-				setSelectedNovelForUpload(null);
-				uploadForm.resetFields();
-			} else {
-				message.error('Failed to save chapters');
-			}
+			message.success('Chapters saved successfully');
+			setUploadModalVisible(false);
+			setPreviewModalVisible(false);
+			setParsedChapters([]);
+			setFileContent('');
+			setSelectedNovelForUpload(null);
+			uploadForm.resetFields();
 		} catch (error) {
-			message.error('Error saving chapters');
+			if (error instanceof AxiosError) {
+				message.error(
+					`Failed to save chapters: ${error.response?.statusText || error.message}`,
+				);
+			} else {
+				message.error('Error saving chapters');
+			}
 		}
 	};
 

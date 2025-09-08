@@ -20,7 +20,10 @@ import {
 	Tag,
 	Typography,
 } from 'antd';
+import { AxiosError } from 'axios';
 import React, { useEffect, useState } from 'react';
+
+import axiosInstance from '@/lib/axios';
 
 const { Title, Paragraph } = Typography;
 
@@ -64,26 +67,22 @@ const HomeComponent: React.FC<{ onNavigate?: (key: string) => void }> = ({
 		setLoading(true);
 		try {
 			// Fetch novels
-			const novelsResponse = await fetch('/api/novels');
-			const novels = novelsResponse.ok ? await novelsResponse.json() : [];
+			const novelsResponse = await axiosInstance.get('/api/novels');
+			const novels = novelsResponse.data || [];
 
 			// Fetch LM Studio endpoints
-			const lmStudiosResponse = await fetch('/api/lmstudio');
-			const lmStudios = lmStudiosResponse.ok
-				? await lmStudiosResponse.json()
-				: [];
+			const lmStudiosResponse = await axiosInstance.get('/api/lmstudio');
+			const lmStudios = lmStudiosResponse.data || [];
 
 			// Fetch chapters for all novels to calculate stats
 			let allChapters: Chapter[] = [];
 			for (const novel of novels) {
 				try {
-					const chaptersResponse = await fetch(
+					const chaptersResponse = await axiosInstance.get(
 						`/api/chapters?novelId=${novel.id}`,
 					);
-					if (chaptersResponse.ok) {
-						const chapters = await chaptersResponse.json();
-						allChapters = [...allChapters, ...chapters];
-					}
+					const chapters = chaptersResponse.data;
+					allChapters = [...allChapters, ...chapters];
 				} catch (error) {
 					console.error(
 						`Error fetching chapters for novel ${novel.id}:`,
@@ -105,7 +104,14 @@ const HomeComponent: React.FC<{ onNavigate?: (key: string) => void }> = ({
 
 			setRecentNovels(novels.slice(-5)); // Show last 5 novels
 		} catch (error) {
-			console.error('Error fetching dashboard data:', error);
+			if (error instanceof AxiosError) {
+				console.error(
+					'Error fetching dashboard data:',
+					error.response?.statusText || error.message,
+				);
+			} else {
+				console.error('Error fetching dashboard data:', error);
+			}
 		} finally {
 			setLoading(false);
 		}

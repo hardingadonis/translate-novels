@@ -22,7 +22,10 @@ import {
 	Typography,
 	message,
 } from 'antd';
+import { AxiosError } from 'axios';
 import React, { useEffect, useState } from 'react';
+
+import axiosInstance from '@/lib/axios';
 
 const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
@@ -84,44 +87,49 @@ const TranslateComponent: React.FC = () => {
 
 	const fetchNovels = async () => {
 		try {
-			const response = await fetch('/api/novels');
-			if (response.ok) {
-				const data = await response.json();
-				setNovels(data);
-			} else {
-				message.error('Failed to fetch novels');
-			}
+			const response = await axiosInstance.get('/api/novels');
+			setNovels(response.data);
 		} catch (error) {
-			message.error('Error fetching novels');
+			if (error instanceof AxiosError) {
+				message.error(
+					`Failed to fetch novels: ${error.response?.statusText || error.message}`,
+				);
+			} else {
+				message.error('Error fetching novels');
+			}
 		}
 	};
 
 	const fetchChapters = async (novelId: number) => {
 		try {
-			const response = await fetch(`/api/chapters?novelId=${novelId}`);
-			if (response.ok) {
-				const data = await response.json();
-				setChapters(data);
-				setSelectedChapterIds([]);
-			} else {
-				message.error('Failed to fetch chapters');
-			}
+			const response = await axiosInstance.get(
+				`/api/chapters?novelId=${novelId}`,
+			);
+			setChapters(response.data);
+			setSelectedChapterIds([]);
 		} catch (error) {
-			message.error('Error fetching chapters');
+			if (error instanceof AxiosError) {
+				message.error(
+					`Failed to fetch chapters: ${error.response?.statusText || error.message}`,
+				);
+			} else {
+				message.error('Error fetching chapters');
+			}
 		}
 	};
 
 	const fetchLMStudios = async () => {
 		try {
-			const response = await fetch('/api/lmstudio');
-			if (response.ok) {
-				const data = await response.json();
-				setLMStudios(data);
-			} else {
-				message.error('Failed to fetch LM Studios');
-			}
+			const response = await axiosInstance.get('/api/lmstudio');
+			setLMStudios(response.data);
 		} catch (error) {
-			message.error('Error fetching LM Studios');
+			if (error instanceof AxiosError) {
+				message.error(
+					`Failed to fetch LM Studios: ${error.response?.statusText || error.message}`,
+				);
+			} else {
+				message.error('Error fetching LM Studios');
+			}
 		}
 	};
 
@@ -147,49 +155,45 @@ const TranslateComponent: React.FC = () => {
 		});
 
 		try {
-			const response = await fetch('/api/translate', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({
-					apiEndpoint: selectedLMStudio.apiEndpoint,
-					chapterIds: selectedChapterIds,
-					customPrompt: customPrompt || undefined,
-				}),
+			const response = await axiosInstance.post('/api/translate', {
+				apiEndpoint: selectedLMStudio.apiEndpoint,
+				chapterIds: selectedChapterIds,
+				customPrompt: customPrompt || undefined,
 			});
 
-			if (response.ok) {
-				const data = await response.json();
-				setTranslationProgress((prev) => ({
-					...prev,
-					current: prev.total,
-					results: data.results,
-				}));
+			const data = response.data;
+			setTranslationProgress((prev) => ({
+				...prev,
+				current: prev.total,
+				results: data.results,
+			}));
 
-				const successCount = data.results.filter(
-					(r: TranslationResult) => r.success,
-				).length;
-				const failCount = data.results.filter(
-					(r: TranslationResult) => !r.success,
-				).length;
+			const successCount = data.results.filter(
+				(r: TranslationResult) => r.success,
+			).length;
+			const failCount = data.results.filter(
+				(r: TranslationResult) => !r.success,
+			).length;
 
-				if (successCount > 0) {
-					message.success(
-						`Translation completed: ${successCount} successful, ${failCount} failed`,
-					);
-					// Refresh chapters to show updated translations
-					if (selectedNovelId) {
-						fetchChapters(selectedNovelId);
-					}
-				} else {
-					message.error('All translations failed');
+			if (successCount > 0) {
+				message.success(
+					`Translation completed: ${successCount} successful, ${failCount} failed`,
+				);
+				// Refresh chapters to show updated translations
+				if (selectedNovelId) {
+					fetchChapters(selectedNovelId);
 				}
 			} else {
-				message.error('Failed to translate chapters');
+				message.error('All translations failed');
 			}
 		} catch (error) {
-			message.error('Error during translation');
+			if (error instanceof AxiosError) {
+				message.error(
+					`Failed to translate chapters: ${error.response?.statusText || error.message}`,
+				);
+			} else {
+				message.error('Error during translation');
+			}
 		} finally {
 			setIsTranslating(false);
 		}

@@ -23,7 +23,10 @@ import {
 	Typography,
 	message,
 } from 'antd';
+import { AxiosError } from 'axios';
 import React, { useEffect, useState } from 'react';
+
+import axiosInstance from '@/lib/axios';
 
 const { Title, Text } = Typography;
 
@@ -58,15 +61,16 @@ const LMStudioComponent: React.FC = () => {
 	const fetchLMStudios = async () => {
 		setLoading(true);
 		try {
-			const response = await fetch('/api/lmstudio');
-			if (response.ok) {
-				const data = await response.json();
-				setLMStudios(data);
-			} else {
-				message.error('Failed to fetch LM Studio endpoints');
-			}
+			const response = await axiosInstance.get('/api/lmstudio');
+			setLMStudios(response.data);
 		} catch (error) {
-			message.error('Error fetching LM Studio endpoints');
+			if (error instanceof AxiosError) {
+				message.error(
+					`Failed to fetch LM Studio endpoints: ${error.response?.statusText || error.message}`,
+				);
+			} else {
+				message.error('Error fetching LM Studio endpoints');
+			}
 		} finally {
 			setLoading(false);
 		}
@@ -74,63 +78,51 @@ const LMStudioComponent: React.FC = () => {
 
 	const handleCreateOrUpdate = async (values: { apiEndpoint: string }) => {
 		try {
-			const url = '/api/lmstudio';
-			const method = editingLMStudio ? 'PUT' : 'POST';
-			const body = editingLMStudio
+			const method = editingLMStudio ? 'put' : 'post';
+			const data = editingLMStudio
 				? { id: editingLMStudio.id, apiEndpoint: values.apiEndpoint }
 				: { apiEndpoint: values.apiEndpoint };
 
-			const response = await fetch(url, {
-				method,
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify(body),
-			});
+			await axiosInstance[method]('/api/lmstudio', data);
 
-			if (response.ok) {
-				message.success(
-					`LM Studio endpoint ${editingLMStudio ? 'updated' : 'created'} successfully`,
+			message.success(
+				`LM Studio endpoint ${editingLMStudio ? 'updated' : 'created'} successfully`,
+			);
+			setModalVisible(false);
+			setEditingLMStudio(null);
+			form.resetFields();
+			fetchLMStudios();
+		} catch (error) {
+			if (error instanceof AxiosError) {
+				message.error(
+					`Failed to ${editingLMStudio ? 'update' : 'create'} LM Studio endpoint: ${error.response?.statusText || error.message}`,
 				);
-				setModalVisible(false);
-				setEditingLMStudio(null);
-				form.resetFields();
-				fetchLMStudios();
 			} else {
 				message.error(
-					`Failed to ${editingLMStudio ? 'update' : 'create'} LM Studio endpoint`,
+					`Error ${editingLMStudio ? 'updating' : 'creating'} LM Studio endpoint`,
 				);
 			}
-		} catch (error) {
-			message.error(
-				`Error ${editingLMStudio ? 'updating' : 'creating'} LM Studio endpoint`,
-			);
 		}
 	};
 
 	const handleDelete = async (id: number) => {
 		try {
-			const response = await fetch('/api/lmstudio', {
-				method: 'DELETE',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({ id }),
+			await axiosInstance.delete('/api/lmstudio', { data: { id } });
+			message.success('LM Studio endpoint deleted successfully');
+			setConnectionResults((prev) => {
+				const updated = { ...prev };
+				delete updated[id];
+				return updated;
 			});
-
-			if (response.ok) {
-				message.success('LM Studio endpoint deleted successfully');
-				setConnectionResults((prev) => {
-					const updated = { ...prev };
-					delete updated[id];
-					return updated;
-				});
-				fetchLMStudios();
-			} else {
-				message.error('Failed to delete LM Studio endpoint');
-			}
+			fetchLMStudios();
 		} catch (error) {
-			message.error('Error deleting LM Studio endpoint');
+			if (error instanceof AxiosError) {
+				message.error(
+					`Failed to delete LM Studio endpoint: ${error.response?.statusText || error.message}`,
+				);
+			} else {
+				message.error('Error deleting LM Studio endpoint');
+			}
 		}
 	};
 
@@ -138,37 +130,43 @@ const LMStudioComponent: React.FC = () => {
 		setTestingConnections((prev) => ({ ...prev, [lmStudio.id]: true }));
 
 		try {
-			const response = await fetch('/api/lmstudio/test', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({ apiEndpoint: lmStudio.apiEndpoint }),
+			const response = await axiosInstance.post('/api/lmstudio/test', {
+				apiEndpoint: lmStudio.apiEndpoint,
 			});
 
-			if (response.ok) {
-				const result: ConnectionTestResult = await response.json();
-				setConnectionResults((prev) => ({ ...prev, [lmStudio.id]: result }));
+			const result: ConnectionTestResult = response.data;
+			setConnectionResults((prev) => ({ ...prev, [lmStudio.id]: result }));
 
-				if (result.success) {
-					message.success(
-						`Connection successful! Found ${result.models?.length || 0} models`,
-					);
-				} else {
-					message.error(`Connection failed: ${result.error}`);
-				}
+			if (result.success) {
+				message.success(
+					`Connection successful! Found ${result.models?.length || 0} models`,
+				);
 			} else {
-				message.error('Failed to test connection');
+				message.error(`Connection failed: ${result.error}`);
 			}
 		} catch (error) {
-			message.error('Error testing connection');
-			setConnectionResults((prev) => ({
-				...prev,
-				[lmStudio.id]: {
-					success: false,
-					error: 'Network error',
-				},
-			}));
+			if (error instanceof AxiosError) {
+				message.error(
+					`Error testing connection: ${error.response?.statusText || error.message}`,
+				);
+				setConnectionResults((prev) => ({
+					...prev,
+					[lmStudio.id]: {
+						success: false,
+						error:
+							error.response?.statusText || error.message || 'Network error',
+					},
+				}));
+			} else {
+				message.error('Error testing connection');
+				setConnectionResults((prev) => ({
+					...prev,
+					[lmStudio.id]: {
+						success: false,
+						error: 'Network error',
+					},
+				}));
+			}
 		} finally {
 			setTestingConnections((prev) => ({ ...prev, [lmStudio.id]: false }));
 		}

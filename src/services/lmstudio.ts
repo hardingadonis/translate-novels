@@ -1,4 +1,7 @@
+import { AxiosError } from 'axios';
+
 import { APILMStudio } from '@/generated/prisma';
+import axiosInstance from '@/lib/axios';
 import { prisma } from '@/lib/prisma';
 
 export const getAllLMStudios = async (): Promise<APILMStudio[]> => {
@@ -15,16 +18,22 @@ export const testLMStudioConnection = async (
 	apiEndpoint: string,
 ): Promise<{ success: boolean; models?: any[]; error?: string }> => {
 	try {
-		const response = await fetch(`${apiEndpoint}/v1/models`);
-		if (!response.ok) {
-			return {
-				success: false,
-				error: `HTTP ${response.status}: ${response.statusText}`,
-			};
-		}
-		const data = await response.json();
+		const response = await axiosInstance.get(`${apiEndpoint}/v1/models`);
+		const data = response.data;
 		return { success: true, models: data.data || [] };
 	} catch (error) {
+		if (error instanceof AxiosError) {
+			if (error.code === 'ECONNABORTED') {
+				return {
+					success: false,
+					error: 'Connection timeout - Please check if LM Studio is running',
+				};
+			}
+			return {
+				success: false,
+				error: `HTTP ${error.response?.status || 'Unknown'}: ${error.response?.statusText || error.message}`,
+			};
+		}
 		return {
 			success: false,
 			error: error instanceof Error ? error.message : 'Connection failed',
@@ -42,28 +51,18 @@ export const translateWithLMStudio = async (
 			customPrompt ||
 			'Please translate the following text from English to Vietnamese, maintaining the narrative style and character names:';
 
-		const response = await fetch(`${apiEndpoint}/v1/chat/completions`, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify({
+		const response = await axiosInstance.post(
+			`${apiEndpoint}/v1/chat/completions`,
+			{
 				messages: [
 					{ role: 'system', content: prompt },
 					{ role: 'user', content: content },
 				],
 				temperature: 0.7,
-			}),
-		});
+			},
+		);
 
-		if (!response.ok) {
-			return {
-				success: false,
-				error: `HTTP ${response.status}: ${response.statusText}`,
-			};
-		}
-
-		const data = await response.json();
+		const data = response.data;
 		const translation = data.choices?.[0]?.message?.content;
 
 		if (!translation) {
@@ -72,6 +71,18 @@ export const translateWithLMStudio = async (
 
 		return { success: true, translation };
 	} catch (error) {
+		if (error instanceof AxiosError) {
+			if (error.code === 'ECONNABORTED') {
+				return {
+					success: false,
+					error: 'Translation timeout - The request took too long to complete',
+				};
+			}
+			return {
+				success: false,
+				error: `HTTP ${error.response?.status || 'Unknown'}: ${error.response?.statusText || error.message}`,
+			};
+		}
 		return {
 			success: false,
 			error: error instanceof Error ? error.message : 'Translation failed',

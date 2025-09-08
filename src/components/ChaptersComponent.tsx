@@ -22,7 +22,10 @@ import {
 	Typography,
 	message,
 } from 'antd';
+import { AxiosError } from 'axios';
 import React, { useEffect, useState } from 'react';
+
+import axiosInstance from '@/lib/axios';
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -64,33 +67,38 @@ const ChaptersComponent: React.FC = () => {
 
 	const fetchNovels = async () => {
 		try {
-			const response = await fetch('/api/novels');
-			if (response.ok) {
-				const data = await response.json();
-				setNovels(data);
-				if (data.length > 0 && !selectedNovelId) {
-					setSelectedNovelId(data[0].id);
-				}
-			} else {
-				message.error('Failed to fetch novels');
+			const response = await axiosInstance.get('/api/novels');
+			const data = response.data;
+			setNovels(data);
+			if (data.length > 0 && !selectedNovelId) {
+				setSelectedNovelId(data[0].id);
 			}
 		} catch (error) {
-			message.error('Error fetching novels');
+			if (error instanceof AxiosError) {
+				message.error(
+					`Failed to fetch novels: ${error.response?.statusText || error.message}`,
+				);
+			} else {
+				message.error('Error fetching novels');
+			}
 		}
 	};
 
 	const fetchChapters = async (novelId: number) => {
 		setLoading(true);
 		try {
-			const response = await fetch(`/api/chapters?novelId=${novelId}`);
-			if (response.ok) {
-				const data = await response.json();
-				setChapters(data);
-			} else {
-				message.error('Failed to fetch chapters');
-			}
+			const response = await axiosInstance.get(
+				`/api/chapters?novelId=${novelId}`,
+			);
+			setChapters(response.data);
 		} catch (error) {
-			message.error('Error fetching chapters');
+			if (error instanceof AxiosError) {
+				message.error(
+					`Failed to fetch chapters: ${error.response?.statusText || error.message}`,
+				);
+			} else {
+				message.error('Error fetching chapters');
+			}
 		} finally {
 			setLoading(false);
 		}
@@ -106,9 +114,8 @@ const ChaptersComponent: React.FC = () => {
 		}
 
 		try {
-			const url = '/api/chapters';
-			const method = editingChapter ? 'PUT' : 'POST';
-			const body = editingChapter
+			const method = editingChapter ? 'put' : 'post';
+			const data = editingChapter
 				? {
 						id: editingChapter.id,
 						rawContent: values.rawContent,
@@ -120,54 +127,43 @@ const ChaptersComponent: React.FC = () => {
 						order: values.order,
 					};
 
-			const response = await fetch(url, {
-				method,
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify(body),
-			});
+			await axiosInstance[method]('/api/chapters', data);
 
-			if (response.ok) {
-				message.success(
-					`Chapter ${editingChapter ? 'updated' : 'created'} successfully`,
+			message.success(
+				`Chapter ${editingChapter ? 'updated' : 'created'} successfully`,
+			);
+			setModalVisible(false);
+			setEditingChapter(null);
+			form.resetFields();
+			fetchChapters(selectedNovelId);
+		} catch (error) {
+			if (error instanceof AxiosError) {
+				message.error(
+					`Failed to ${editingChapter ? 'update' : 'create'} chapter: ${error.response?.statusText || error.message}`,
 				);
-				setModalVisible(false);
-				setEditingChapter(null);
-				form.resetFields();
-				fetchChapters(selectedNovelId);
 			} else {
 				message.error(
-					`Failed to ${editingChapter ? 'update' : 'create'} chapter`,
+					`Error ${editingChapter ? 'updating' : 'creating'} chapter`,
 				);
 			}
-		} catch (error) {
-			message.error(
-				`Error ${editingChapter ? 'updating' : 'creating'} chapter`,
-			);
 		}
 	};
 
 	const handleDelete = async (id: number) => {
 		try {
-			const response = await fetch('/api/chapters', {
-				method: 'DELETE',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({ id }),
-			});
-
-			if (response.ok) {
-				message.success('Chapter deleted successfully');
-				if (selectedNovelId) {
-					fetchChapters(selectedNovelId);
-				}
-			} else {
-				message.error('Failed to delete chapter');
+			await axiosInstance.delete('/api/chapters', { data: { id } });
+			message.success('Chapter deleted successfully');
+			if (selectedNovelId) {
+				fetchChapters(selectedNovelId);
 			}
 		} catch (error) {
-			message.error('Error deleting chapter');
+			if (error instanceof AxiosError) {
+				message.error(
+					`Failed to delete chapter: ${error.response?.statusText || error.message}`,
+				);
+			} else {
+				message.error('Error deleting chapter');
+			}
 		}
 	};
 
