@@ -66,15 +66,12 @@ const HomeComponent: React.FC<{ onNavigate?: (key: string) => void }> = ({
 	const fetchDashboardData = async () => {
 		setLoading(true);
 		try {
-			// Fetch novels
 			const novelsResponse = await axiosInstance.get('/api/novels');
 			const novels = novelsResponse.data || [];
 
-			// Fetch LM Studio endpoints
 			const lmStudiosResponse = await axiosInstance.get('/api/lmstudio');
 			const lmStudios = lmStudiosResponse.data || [];
 
-			// Fetch chapters for all novels to calculate stats
 			let allChapters: Chapter[] = [];
 			for (const novel of novels) {
 				try {
@@ -102,7 +99,7 @@ const HomeComponent: React.FC<{ onNavigate?: (key: string) => void }> = ({
 				lmStudioEndpoints: lmStudios.length,
 			});
 
-			setRecentNovels(novels.slice(-5)); // Show last 5 novels
+			setRecentNovels(novels.slice(-5));
 		} catch (error) {
 			if (error instanceof AxiosError) {
 				console.error(

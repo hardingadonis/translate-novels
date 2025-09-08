@@ -136,9 +136,8 @@ const NovelsComponent: React.FC = () => {
 				const content = e.target?.result as string;
 				if (content) {
 					setFileContent(content);
-					// Parse chapters asynchronously and resolve when done
 					parseChapters(content).finally(() => {
-						resolve(false); // Always return false to prevent default upload
+						resolve(false);
 					});
 				} else {
 					message.error('File content is empty');
@@ -148,17 +147,15 @@ const NovelsComponent: React.FC = () => {
 
 			reader.onerror = () => {
 				message.error('Failed to read file');
-				resolve(false); // Return false even on error to prevent upload
+				resolve(false);
 			};
 
-			// Validate file type before reading
 			if (!file.name.toLowerCase().endsWith('.txt')) {
 				message.error('Please select a .txt file');
 				resolve(false);
 				return;
 			}
 
-			// Start reading the file directly (file is already a File object)
 			reader.readAsText(file);
 		});
 	};
@@ -236,7 +233,6 @@ const NovelsComponent: React.FC = () => {
 						type="text"
 						icon={<EyeOutlined />}
 						onClick={() => {
-							// Navigate to chapters view - this would be handled by parent component
 							message.info(`Viewing chapters for: ${record.title}`);
 						}}
 					/>

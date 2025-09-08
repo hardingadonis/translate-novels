@@ -17,7 +17,6 @@ export async function POST(request: NextRequest) {
 		const results: { chapterId: number; success: boolean; error?: string }[] =
 			[];
 
-		// Import the chapter service function
 		const { getChapter } = await import('@/services/chapter');
 
 		for (const chapterId of chapterIds) {

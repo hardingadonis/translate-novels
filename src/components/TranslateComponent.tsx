@@ -179,7 +179,6 @@ const TranslateComponent: React.FC = () => {
 				message.success(
 					`Translation completed: ${successCount} successful, ${failCount} failed`,
 				);
-				// Refresh chapters to show updated translations
 				if (selectedNovelId) {
 					fetchChapters(selectedNovelId);
 				}

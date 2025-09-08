@@ -35,11 +35,9 @@ export async function POST(request: NextRequest) {
 		const body = await request.json();
 
 		if (Array.isArray(body)) {
-			// Multiple chapters
 			const chapters = await createMultipleChapters(body);
 			return NextResponse.json(chapters, { status: 201 });
 		} else {
-			// Single chapter
 			const { rawContent, novelId, order = 0 } = body;
 
 			if (!rawContent || !novelId) {
