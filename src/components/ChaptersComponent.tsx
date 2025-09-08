@@ -181,7 +181,7 @@ const ChaptersComponent: React.FC = () => {
 			.sort((a, b) => a.order - b.order)
 			.map((chapter, index) => {
 				const content = chapter.vietnameseContent || chapter.rawContent;
-				return `Chapter ${index + 1}\n\n${content}`;
+				return `Chapter ${index}\n\n${content}`;
 			})
 			.join('\n\n---\n\n');
 
