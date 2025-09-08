@@ -13,8 +13,8 @@ export const parseChaptersFromText = (text: string): ParsedChapter[] => {
 		/\b(第\s*\d+[^\r\n]*?章)/gi,
 	];
 
-	let currentText = text.trim();
-	let allMatches: Array<{ match: string; index: number; pattern: RegExp }> = [];
+	const currentText = text.trim();
+	const allMatches: Array<{ match: string; index: number; pattern: RegExp }> = [];
 
 	for (const pattern of chapterPatterns) {
 		const matches = Array.from(currentText.matchAll(pattern));
@@ -80,7 +80,7 @@ export const parseChaptersFromText = (text: string): ParsedChapter[] => {
 			chapterEnd = currentText.length;
 		}
 
-		let chapterContent = currentText.substring(chapterStart, chapterEnd).trim();
+		const chapterContent = currentText.substring(chapterStart, chapterEnd).trim();
 
 		if (chapterContent) {
 			chapters.push({

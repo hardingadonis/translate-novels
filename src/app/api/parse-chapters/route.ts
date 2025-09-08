@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
 
 		const chapters = parseChaptersFromText(text);
 		return NextResponse.json({ chapters });
-	} catch (error) {
+	} catch (_error) {
 		return NextResponse.json(
 			{ error: 'Failed to parse chapters' },
 			{ status: 500 },

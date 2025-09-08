@@ -227,7 +227,7 @@ const NovelsComponent: React.FC = () => {
 			title: 'Actions',
 			key: 'actions',
 			width: 200,
-			render: (_: any, record: Novel) => (
+			render: (_: unknown, record: Novel) => (
 				<Space size="small">
 					<Button
 						type="text"
@@ -377,7 +377,8 @@ const NovelsComponent: React.FC = () => {
 					{fileContent && (
 						<Form.Item>
 							<Text type="secondary">
-								File uploaded successfully. Click "Parse Chapters" to preview.
+								File uploaded successfully. Click &quot;Parse Chapters&quot; to
+								preview.
 							</Text>
 						</Form.Item>
 					)}

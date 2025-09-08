@@ -16,7 +16,11 @@ export const getAllLMStudios = async (): Promise<APILMStudio[]> => {
 
 export const testLMStudioConnection = async (
 	apiEndpoint: string,
-): Promise<{ success: boolean; models?: any[]; error?: string }> => {
+): Promise<{
+	success: boolean;
+	models?: { id: string; name?: string }[];
+	error?: string;
+}> => {
 	try {
 		const response = await axiosInstance.get(`${apiEndpoint}/v1/models`);
 		const data = response.data;

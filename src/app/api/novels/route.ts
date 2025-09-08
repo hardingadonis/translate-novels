@@ -11,7 +11,7 @@ export async function GET() {
 	try {
 		const novels = await getAllNovels();
 		return NextResponse.json(novels);
-	} catch (error) {
+	} catch (_error) {
 		return NextResponse.json(
 			{ error: 'Failed to fetch novels' },
 			{ status: 500 },
@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
 
 		const novel = await createNovel({ title });
 		return NextResponse.json(novel, { status: 201 });
-	} catch (error) {
+	} catch (_error) {
 		return NextResponse.json(
 			{ error: 'Failed to create novel' },
 			{ status: 500 },
@@ -50,7 +50,7 @@ export async function PUT(request: NextRequest) {
 
 		const novel = await updateNovel(id, { title });
 		return NextResponse.json(novel);
-	} catch (error) {
+	} catch (_error) {
 		return NextResponse.json(
 			{ error: 'Failed to update novel' },
 			{ status: 500 },
@@ -68,7 +68,7 @@ export async function DELETE(request: NextRequest) {
 
 		await deleteNovel(id);
 		return NextResponse.json({ success: true });
-	} catch (error) {
+	} catch (_error) {
 		return NextResponse.json(
 			{ error: 'Failed to delete novel' },
 			{ status: 500 },

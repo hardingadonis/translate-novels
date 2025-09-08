@@ -15,7 +15,6 @@ import {
 	List,
 	Progress,
 	Row,
-	Space,
 	Statistic,
 	Tag,
 	Typography,
@@ -300,7 +299,7 @@ const HomeComponent: React.FC<{ onNavigate?: (key: string) => void }> = ({
 					message="Setup Required"
 					description={
 						<div>
-							You haven't configured any LM Studio endpoints yet.
+							You haven&apos;t configured any LM Studio endpoints yet.
 							<Button
 								type="link"
 								onClick={() => onNavigate?.('settings')}

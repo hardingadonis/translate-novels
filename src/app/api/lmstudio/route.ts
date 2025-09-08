@@ -4,7 +4,6 @@ import {
 	createLMStudio,
 	deleteLMStudio,
 	getAllLMStudios,
-	testLMStudioConnection,
 	updateLMStudio,
 } from '@/services/lmstudio';
 
@@ -12,7 +11,7 @@ export async function GET() {
 	try {
 		const lmStudios = await getAllLMStudios();
 		return NextResponse.json(lmStudios);
-	} catch (error) {
+	} catch (_error) {
 		return NextResponse.json(
 			{ error: 'Failed to fetch LM Studios' },
 			{ status: 500 },
@@ -33,7 +32,7 @@ export async function POST(request: NextRequest) {
 
 		const lmStudio = await createLMStudio({ apiEndpoint });
 		return NextResponse.json(lmStudio, { status: 201 });
-	} catch (error) {
+	} catch (_error) {
 		return NextResponse.json(
 			{ error: 'Failed to create LM Studio' },
 			{ status: 500 },
@@ -54,7 +53,7 @@ export async function PUT(request: NextRequest) {
 
 		const lmStudio = await updateLMStudio(id, { apiEndpoint });
 		return NextResponse.json(lmStudio);
-	} catch (error) {
+	} catch (_error) {
 		return NextResponse.json(
 			{ error: 'Failed to update LM Studio' },
 			{ status: 500 },
@@ -72,7 +71,7 @@ export async function DELETE(request: NextRequest) {
 
 		await deleteLMStudio(id);
 		return NextResponse.json({ success: true });
-	} catch (error) {
+	} catch (_error) {
 		return NextResponse.json(
 			{ error: 'Failed to delete LM Studio' },
 			{ status: 500 },

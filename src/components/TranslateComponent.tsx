@@ -5,7 +5,6 @@ import {
 	CloseCircleOutlined,
 	EyeOutlined,
 	PlayCircleOutlined,
-	TranslationOutlined,
 } from '@ant-design/icons';
 import {
 	Button,
@@ -27,7 +26,7 @@ import React, { useEffect, useState } from 'react';
 
 import axiosInstance from '@/lib/axios';
 
-const { Title, Text, Paragraph } = Typography;
+const { Title, Text } = Typography;
 const { TextArea } = Input;
 const { Option } = Select;
 
@@ -264,7 +263,7 @@ const TranslateComponent: React.FC = () => {
 			title: 'Status',
 			key: 'status',
 			width: 120,
-			render: (_: any, record: Chapter) => {
+			render: (_: unknown, record: Chapter) => {
 				const result = translationProgress.results.find(
 					(r) => r.chapterId === record.id,
 				);
@@ -295,7 +294,7 @@ const TranslateComponent: React.FC = () => {
 			title: 'Actions',
 			key: 'actions',
 			width: 80,
-			render: (_: any, record: Chapter) => (
+			render: (_: unknown, record: Chapter) => (
 				<Button
 					type="text"
 					icon={<EyeOutlined />}
@@ -360,9 +359,9 @@ const TranslateComponent: React.FC = () => {
 							style={{ marginTop: 8 }}
 						/>
 						<Text type="secondary" style={{ fontSize: 12 }}>
-							Leave empty to use default prompt: "Please translate the following
-							text from English to Vietnamese, maintaining the narrative style
-							and character names"
+							Leave empty to use default prompt: &quot;Please translate the
+							following text from English to Vietnamese, maintaining the
+							narrative style and character names&quot;
 						</Text>
 					</div>
 				</Space>

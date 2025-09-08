@@ -10,7 +10,6 @@ import {
 import {
 	Button,
 	Card,
-	Divider,
 	Form,
 	Input,
 	Modal,
@@ -23,7 +22,7 @@ import {
 	message,
 } from 'antd';
 import { AxiosError } from 'axios';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import axiosInstance from '@/lib/axios';
 
@@ -55,17 +54,7 @@ const ChaptersComponent: React.FC = () => {
 	const [selectedNovelId, setSelectedNovelId] = useState<number | null>(null);
 	const [form] = Form.useForm();
 
-	useEffect(() => {
-		fetchNovels();
-	}, []);
-
-	useEffect(() => {
-		if (selectedNovelId) {
-			fetchChapters(selectedNovelId);
-		}
-	}, [selectedNovelId]);
-
-	const fetchNovels = async () => {
+	const fetchNovels = useCallback(async () => {
 		try {
 			const response = await axiosInstance.get('/api/novels');
 			const data = response.data;
@@ -82,7 +71,17 @@ const ChaptersComponent: React.FC = () => {
 				message.error('Error fetching novels');
 			}
 		}
-	};
+	}, [selectedNovelId]);
+
+	useEffect(() => {
+		fetchNovels();
+	}, [fetchNovels]);
+
+	useEffect(() => {
+		if (selectedNovelId) {
+			fetchChapters(selectedNovelId);
+		}
+	}, [selectedNovelId]);
 
 	const fetchChapters = async (novelId: number) => {
 		setLoading(true);
@@ -216,7 +215,7 @@ const ChaptersComponent: React.FC = () => {
 			title: 'Status',
 			key: 'status',
 			width: 120,
-			render: (_: any, record: Chapter) => (
+			render: (_: unknown, record: Chapter) => (
 				<Tag color={record.vietnameseContent ? 'green' : 'orange'}>
 					{record.vietnameseContent ? 'Translated' : 'Raw Only'}
 				</Tag>
@@ -226,7 +225,7 @@ const ChaptersComponent: React.FC = () => {
 			title: 'Actions',
 			key: 'actions',
 			width: 150,
-			render: (_: any, record: Chapter) => (
+			render: (_: unknown, record: Chapter) => (
 				<Space size="small">
 					<Button
 						type="text"

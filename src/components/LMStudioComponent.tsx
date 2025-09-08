@@ -11,7 +11,6 @@ import {
 import {
 	Alert,
 	Button,
-	Card,
 	Form,
 	Input,
 	Modal,
@@ -37,7 +36,7 @@ interface LMStudio {
 
 interface ConnectionTestResult {
 	success: boolean;
-	models?: any[];
+	models?: { id: string; name?: string }[];
 	error?: string;
 }
 
@@ -189,7 +188,7 @@ const LMStudioComponent: React.FC = () => {
 			title: 'Status',
 			key: 'status',
 			width: 150,
-			render: (_: any, record: LMStudio) => {
+			render: (_: unknown, record: LMStudio) => {
 				const result = connectionResults[record.id];
 				if (testingConnections[record.id]) {
 					return (
@@ -222,7 +221,7 @@ const LMStudioComponent: React.FC = () => {
 			title: 'Actions',
 			key: 'actions',
 			width: 200,
-			render: (_: any, record: LMStudio) => (
+			render: (_: unknown, record: LMStudio) => (
 				<Space size="small">
 					<Button
 						type="text"
@@ -292,7 +291,7 @@ const LMStudioComponent: React.FC = () => {
 								<Text code>http://localhost:1234</Text>
 							</li>
 							<li>The API is compatible with OpenAI format</li>
-							<li>Test each endpoint to verify it's working properly</li>
+							<li>Test each endpoint to verify it&apos;s working properly</li>
 						</ul>
 					</div>
 				}
@@ -338,7 +337,7 @@ const LMStudioComponent: React.FC = () => {
 							<ul style={{ margin: 0, paddingLeft: 16 }}>
 								<li>Make sure LM Studio is running before saving</li>
 								<li>Default port is usually 1234</li>
-								<li>Don't include /v1 in the endpoint URL</li>
+								<li>Don&apos;t include /v1 in the endpoint URL</li>
 							</ul>
 						}
 						type="info"
