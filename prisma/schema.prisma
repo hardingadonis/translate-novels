@@ -11,14 +11,14 @@ datasource db {
 // --------------------------------------------------------------------------------
 
 model APILMStudio {
-  id          String @id @default(uuid())
+  id          Int    @id @default(autoincrement())
   apiEndpoint String @unique @map("api_endpoint")
 
   @@map("api_lm_studio")
 }
 
 model Novel {
-  id    String @id @default(uuid())
+  id    Int    @id @default(autoincrement())
   title String @map("title")
 
   chapters Chapter[]
@@ -27,8 +27,8 @@ model Novel {
 }
 
 model Chapter {
-  id      String @id @default(uuid())
-  novelId String @map("novel_id")
+  id      Int @id @default(autoincrement())
+  novelId Int @map("novel_id")
 
   rawContent        String  @map("raw_content")
   vietnameseContent String? @map("vietnamese_content")
