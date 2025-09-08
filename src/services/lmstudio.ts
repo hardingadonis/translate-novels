@@ -27,7 +27,7 @@ export const createLMStudio = async (data: {
 };
 
 export const updateLMStudio = async (
-	id: string,
+	id: number,
 	data: {
 		name?: string;
 		apiEndpoint?: string;
@@ -45,9 +45,9 @@ export const updateLMStudio = async (
 	}
 };
 
-export const deleteLMStudio = async (id: string): Promise<APILMStudio> => {
+export const deleteLMStudio = async (id: number): Promise<void> => {
 	try {
-		return await prisma.aPILMStudio.delete({
+		await prisma.aPILMStudio.delete({
 			where: { id },
 		});
 	} catch (error) {

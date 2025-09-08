@@ -11,7 +11,7 @@ export const getAllNovels = async (): Promise<Novel[]> => {
 	}
 };
 
-export const getNovel = async (id: string): Promise<Novel | null> => {
+export const getNovel = async (id: number): Promise<Novel | null> => {
 	try {
 		return await prisma.novel.findUnique({
 			where: { id },
@@ -36,7 +36,7 @@ export const createNovel = async (data: { title: string }): Promise<Novel> => {
 };
 
 export const updateNovel = async (
-	id: string,
+	id: number,
 	data: { title?: string },
 ): Promise<Novel | null> => {
 	try {
@@ -51,9 +51,9 @@ export const updateNovel = async (
 	}
 };
 
-export const deleteNovel = async (id: string): Promise<Novel> => {
+export const deleteNovel = async (id: number): Promise<void> => {
 	try {
-		return await prisma.novel.delete({
+		await prisma.novel.delete({
 			where: { id },
 		});
 	} catch (error) {

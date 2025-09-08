@@ -2,7 +2,7 @@ import { Chapter } from '@/generated/prisma';
 import { prisma } from '@/lib/prisma';
 
 export const getAllChaptersByNovel = async (
-	novelId: string,
+	novelId: number,
 ): Promise<Chapter[]> => {
 	try {
 		return await prisma.chapter.findMany({
@@ -15,7 +15,7 @@ export const getAllChaptersByNovel = async (
 	}
 };
 
-export const getChapter = async (id: string): Promise<Chapter | null> => {
+export const getChapter = async (id: number): Promise<Chapter | null> => {
 	try {
 		return await prisma.chapter.findUnique({
 			where: { id },
@@ -30,7 +30,7 @@ export const getChapter = async (id: string): Promise<Chapter | null> => {
 export const createChapter = async (data: {
 	title: string;
 	rawContent: string;
-	novelId: string;
+	novelId: number;
 }): Promise<Chapter> => {
 	try {
 		return await prisma.chapter.create({
@@ -44,7 +44,7 @@ export const createChapter = async (data: {
 };
 
 export const updateChapter = async (
-	id: string,
+	id: number,
 	data: {
 		title?: string;
 		rawContent?: string;
@@ -64,9 +64,9 @@ export const updateChapter = async (
 	}
 };
 
-export const deleteChapter = async (id: string): Promise<Chapter | null> => {
+export const deleteChapter = async (id: number): Promise<void> => {
 	try {
-		return await prisma.chapter.delete({
+		await prisma.chapter.delete({
 			where: { id },
 		});
 	} catch (error) {
