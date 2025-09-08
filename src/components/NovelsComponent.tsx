@@ -135,17 +135,39 @@ const NovelsComponent: React.FC = () => {
 		}
 	};
 
-	const handleFileUpload = (file: UploadFile) => {
-		const reader = new FileReader();
-		reader.onload = (e) => {
-			const content = e.target?.result as string;
-			setFileContent(content);
+	const handleFileUpload = (file: File): Promise<false> => {
+		return new Promise((resolve) => {
+			const reader = new FileReader();
 
-			// Parse chapters
-			parseChapters(content);
-		};
-		reader.readAsText(file.originFileObj as File);
-		return false; // Prevent default upload
+			reader.onload = (e) => {
+				const content = e.target?.result as string;
+				if (content) {
+					setFileContent(content);
+					// Parse chapters asynchronously and resolve when done
+					parseChapters(content).finally(() => {
+						resolve(false); // Always return false to prevent default upload
+					});
+				} else {
+					message.error('File content is empty');
+					resolve(false);
+				}
+			};
+
+			reader.onerror = () => {
+				message.error('Failed to read file');
+				resolve(false); // Return false even on error to prevent upload
+			};
+
+			// Validate file type before reading
+			if (!file.name.toLowerCase().endsWith('.txt')) {
+				message.error('Please select a .txt file');
+				resolve(false);
+				return;
+			}
+
+			// Start reading the file directly (file is already a File object)
+			reader.readAsText(file);
+		});
 	};
 
 	const parseChapters = async (content: string) => {
