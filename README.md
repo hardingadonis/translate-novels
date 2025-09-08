@@ -116,7 +116,7 @@ The application uses the following main models:
 
 ```bash
 # Development
-pnpm dev                 # Start development server
+pnpm dev                # Start development server
 pnpm build              # Build for production
 pnpm start              # Start production server
 
