@@ -1,4 +1,5 @@
-import { Chapter } from '@/generated/prisma';
+import { Chapter } from '@prisma/client';
+
 import { prisma } from '@/lib/prisma';
 
 export const getAllChaptersByNovel = async (

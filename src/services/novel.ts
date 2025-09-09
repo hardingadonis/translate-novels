@@ -1,4 +1,5 @@
-import { Chapter, Novel } from '@/generated/prisma';
+import { Chapter, Novel } from '@prisma/client';
+
 import { prisma } from '@/lib/prisma';
 
 export const getAllNovels = async (): Promise<Novel[]> => {

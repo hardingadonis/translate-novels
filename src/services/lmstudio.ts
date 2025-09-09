@@ -1,6 +1,6 @@
+import { APILMStudio } from '@prisma/client';
 import { AxiosError } from 'axios';
 
-import { APILMStudio } from '@/generated/prisma';
 import axiosInstance from '@/lib/axios';
 import { prisma } from '@/lib/prisma';
 
