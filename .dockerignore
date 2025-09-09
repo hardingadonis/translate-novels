@@ -1,0 +1,22 @@
+# Folders
+
+coverage/
+dist/
+node_modules/
+out/
+test/
+.vscode/
+.next/
+.github/
+src/generated/
+
+# Files
+
+.dockerignore
+.editorconfig
+.env
+.gitignore
+.prettierrc
+Dockerfile
+eslint.config.mjs
+\*.md
