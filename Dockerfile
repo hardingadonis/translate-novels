@@ -14,7 +14,7 @@ RUN pnpm install --frozen-lockfile --ignore-scripts
 COPY ./src ./src
 COPY ./prisma ./prisma
 RUN \
-	pnpm run prisma:generate && \
+	pnpm run prisma:dev && \
 	pnpm run build
 
 #--------------------------------------------------
@@ -36,6 +36,10 @@ RUN \
 WORKDIR /app
 COPY --from=build /app/.next/standalone ./
 COPY --from=build /app/.next/static ./.next/static
+COPY --from=build /app/prisma/translate-novels-database.db ./prisma/translate-novels-database.db
+RUN \
+	chown -R nextjs:nextjs ./prisma && \
+	chmod -R 700 ./prisma
 USER nextjs
 ENTRYPOINT ["node", "server.js"]
 EXPOSE 3000
