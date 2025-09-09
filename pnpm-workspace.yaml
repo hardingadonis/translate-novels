@@ -1,3 +1,8 @@
 ignoredBuiltDependencies:
-  - '@swc/core'
-  - esbuild
+  - '@prisma/client'
+
+onlyBuiltDependencies:
+  - '@prisma/engines'
+  - prisma
+  - sharp
+  - unrs-resolver
