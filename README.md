@@ -78,6 +78,10 @@ Since LM Studio runs on your host machine, you'll need to configure the connecti
    - Navigate to LM Studio settings
    - Set API endpoint to `http://host.docker.internal:1234` (Windows/Mac) or `http://172.17.0.1:1234` (Linux)
 
+### 📋 Changelog
+
+For a detailed list of changes and version history, see [CHANGELOG.md](CHANGELOG.md).
+
 ### 📄 License
 
 This project is licensed under the MIT License.
